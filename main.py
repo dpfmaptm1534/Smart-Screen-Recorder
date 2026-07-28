@@ -7,7 +7,7 @@ import keyboard
 import time
 from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QVBoxLayout,
                              QComboBox, QFileDialog, QLabel, QHBoxLayout,
-                             QSpinBox, QCheckBox, QGridLayout, QFrame)
+                             QSpinBox, QCheckBox, QFrame)
 from PyQt5.QtCore import Qt, QThread, QTimer
 from PyQt5.QtGui import QPainter, QPen, QColor
 
@@ -94,8 +94,8 @@ class ScreenRecorderApp(QWidget):
 
     def initUI(self):
         self.setWindowTitle('Smart-Screen-Recorder')
-        self.resize(620, 430)
-        self.setMinimumSize(560, 390)
+        self.resize(520, 320)
+        self.setMinimumSize(480, 300)
         self.setStyleSheet("""
             QWidget {
                 background-color: #1f2833;
@@ -126,17 +126,23 @@ class ScreenRecorderApp(QWidget):
                 color: #7fb7ff;
                 font-weight: 700;
             }
+            QLabel#fieldLabel {
+                color: #9fb0bf;
+                font-size: 12px;
+                font-weight: 700;
+            }
             QFrame#topBar {
                 background-color: #17202a;
                 border-bottom: 1px solid #334251;
             }
-            QFrame#sideBar {
-                background-color: #222c37;
-                border-right: 1px solid #334251;
-            }
             QFrame#contentPanel {
                 background-color: #26313d;
                 border: 1px solid #3a4958;
+            }
+            QFrame#optionRow {
+                background-color: #202a35;
+                border: 1px solid #3a4958;
+                border-radius: 4px;
             }
             QPushButton {
                 background-color: #334251;
@@ -162,31 +168,6 @@ class ScreenRecorderApp(QWidget):
             }
             QPushButton#recordButton:hover {
                 background-color: #2b1217;
-            }
-            QPushButton#modeTile {
-                background-color: #2f3c49;
-                border: 1px solid #465769;
-                border-radius: 3px;
-                color: #ffffff;
-                font-weight: 700;
-                min-height: 82px;
-                text-align: center;
-            }
-            QPushButton#modeTile:hover {
-                background-color: #3a4b5c;
-                border-color: #6fa7dc;
-            }
-            QPushButton#sideButton {
-                background-color: transparent;
-                border: none;
-                border-radius: 0;
-                color: #c8d2dc;
-                min-height: 34px;
-                padding: 7px 12px;
-                text-align: left;
-            }
-            QPushButton#sideButton:hover {
-                background-color: #2f3c49;
             }
             QComboBox, QSpinBox {
                 background-color: #101820;
@@ -227,30 +208,11 @@ class ScreenRecorderApp(QWidget):
         top_layout.addWidget(self.btn_record)
         root_layout.addWidget(top_bar)
 
-        body_layout = QHBoxLayout()
-        body_layout.setContentsMargins(0, 0, 0, 0)
-        body_layout.setSpacing(0)
-
-        side_bar = QFrame()
-        side_bar.setObjectName("sideBar")
-        side_bar.setFixedWidth(132)
-        side_layout = QVBoxLayout(side_bar)
-        side_layout.setContentsMargins(8, 12, 8, 12)
-        side_layout.setSpacing(6)
-
-        for text in ("홈", "일반", "비디오", "이미지", "정보"):
-            side_button = QPushButton(text)
-            side_button.setObjectName("sideButton")
-            side_layout.addWidget(side_button)
-        side_layout.addStretch()
-
-        body_layout.addWidget(side_bar)
-
         content = QFrame()
         content.setObjectName("contentPanel")
         content_layout = QVBoxLayout(content)
-        content_layout.setContentsMargins(18, 16, 18, 18)
-        content_layout.setSpacing(14)
+        content_layout.setContentsMargins(20, 18, 20, 18)
+        content_layout.setSpacing(12)
 
         header_layout = QHBoxLayout()
         header_text = QVBoxLayout()
@@ -264,19 +226,15 @@ class ScreenRecorderApp(QWidget):
         header_layout.addStretch()
         content_layout.addLayout(header_layout)
 
-        mode_grid = QGridLayout()
-        mode_grid.setSpacing(10)
-        mode_grid.addWidget(self.create_mode_tile("화면 영역 녹화", "선택한 모니터 녹화"), 0, 0)
-        mode_grid.addWidget(self.create_mode_tile("전체 화면 녹화", "모든 모니터 포함"), 0, 1)
-        mode_grid.addWidget(self.create_mode_tile("장치 녹화", "준비 중"), 1, 0)
-        mode_grid.addWidget(self.create_mode_tile("게임 녹화", "준비 중"), 1, 1)
-        content_layout.addLayout(mode_grid)
-
         # 1. 저장 경로 설정
-        path_layout = QHBoxLayout()
+        path_row = QFrame()
+        path_row.setObjectName("optionRow")
+        path_layout = QHBoxLayout(path_row)
+        path_layout.setContentsMargins(12, 8, 10, 8)
         path_layout.setSpacing(8)
         path_caption = QLabel("저장")
-        path_caption.setObjectName("mutedLabel")
+        path_caption.setObjectName("fieldLabel")
+        path_caption.setFixedWidth(78)
         self.path_label = QLabel("output.avi")
         self.path_label.setObjectName("sectionTitle")
         self.btn_path = QPushButton("경로 변경")
@@ -285,18 +243,28 @@ class ScreenRecorderApp(QWidget):
         path_layout.addWidget(self.path_label)
         path_layout.addStretch()
         path_layout.addWidget(self.btn_path)
-        content_layout.addLayout(path_layout)
+        content_layout.addWidget(path_row)
 
         # 2. 모니터 선택
+        monitor_row = QFrame()
+        monitor_row.setObjectName("optionRow")
+        monitor_layout = QHBoxLayout(monitor_row)
+        monitor_layout.setContentsMargins(12, 8, 10, 8)
+        monitor_layout.setSpacing(8)
+        monitor_label = QLabel("녹화 화면")
+        monitor_label.setObjectName("fieldLabel")
+        monitor_label.setFixedWidth(78)
         self.monitor_combo = QComboBox()
         self.populate_monitors()
-        monitor_label = QLabel("녹화할 모니터")
-        monitor_label.setObjectName("mutedLabel")
-        content_layout.addWidget(monitor_label)
-        content_layout.addWidget(self.monitor_combo)
+        monitor_layout.addWidget(monitor_label)
+        monitor_layout.addWidget(self.monitor_combo)
+        content_layout.addWidget(monitor_row)
 
         # 3. 예약 녹화 종료 설정
-        timer_layout = QHBoxLayout()
+        timer_row = QFrame()
+        timer_row.setObjectName("optionRow")
+        timer_layout = QHBoxLayout(timer_row)
+        timer_layout.setContentsMargins(12, 8, 10, 8)
         timer_layout.setSpacing(8)
         self.chk_timer = QCheckBox("예약 종료 사용")
         self.chk_timer.stateChanged.connect(self.toggle_timer_input)
@@ -310,21 +278,16 @@ class ScreenRecorderApp(QWidget):
         timer_layout.addWidget(self.spin_time)
         timer_layout.addWidget(QLabel("분 후 자동 종료"))
         timer_layout.addStretch()
-        content_layout.addLayout(timer_layout)
+        content_layout.addWidget(timer_row)
 
         hint = QLabel("F12로 언제든 녹화를 시작하거나 종료할 수 있습니다.")
         hint.setObjectName("mutedLabel")
         content_layout.addWidget(hint)
+        content_layout.addStretch()
 
-        body_layout.addWidget(content)
-        root_layout.addLayout(body_layout)
+        root_layout.addWidget(content)
 
         self.setLayout(root_layout)
-
-    def create_mode_tile(self, title, subtitle):
-        button = QPushButton(f"{title}\n{subtitle}")
-        button.setObjectName("modeTile")
-        return button
 
     def populate_monitors(self):
         with mss.mss() as sct:
