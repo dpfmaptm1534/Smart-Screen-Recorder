@@ -96,8 +96,8 @@ class ScreenRecorderApp(QWidget):
     def initUI(self):
         self.setWindowTitle('Smart-Screen-Recorder')
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
-        self.resize(680, 390)
-        self.setMinimumSize(640, 360)
+        self.resize(680, 420)
+        self.setMinimumSize(640, 400)
         self.setStyleSheet("""
             QWidget {
                 background-color: #1f2833;
@@ -149,14 +149,14 @@ class ScreenRecorderApp(QWidget):
                 background-color: #202a35;
                 border: 1px solid #3a4958;
                 border-radius: 4px;
-                min-height: 46px;
+                min-height: 64px;
             }
             QPushButton {
                 background-color: #334251;
                 border: 1px solid #465769;
                 border-radius: 4px;
                 color: #edf4fb;
-                min-height: 30px;
+                min-height: 32px;
                 padding: 6px 12px;
             }
             QPushButton:hover {
@@ -208,7 +208,7 @@ class ScreenRecorderApp(QWidget):
                 border: 1px solid #465769;
                 border-radius: 4px;
                 color: #f4f8fb;
-                min-height: 30px;
+                min-height: 32px;
                 padding: 3px 8px;
             }
             QCheckBox {
@@ -293,8 +293,9 @@ class ScreenRecorderApp(QWidget):
         # 1. 저장 경로 설정
         path_row = QFrame()
         path_row.setObjectName("optionRow")
+        path_row.setFixedHeight(64)
         path_layout = QHBoxLayout(path_row)
-        path_layout.setContentsMargins(12, 8, 10, 8)
+        path_layout.setContentsMargins(12, 7, 10, 7)
         path_layout.setSpacing(8)
         path_caption = QLabel("저장")
         path_caption.setObjectName("fieldLabel")
@@ -304,6 +305,7 @@ class ScreenRecorderApp(QWidget):
         self.path_label.setMinimumWidth(220)
         self.btn_path = QPushButton("경로 변경")
         self.btn_path.setMinimumWidth(92)
+        self.btn_path.setFixedHeight(32)
         self.btn_path.clicked.connect(self.set_save_path)
         path_layout.addWidget(path_caption)
         path_layout.addWidget(self.path_label)
@@ -314,14 +316,16 @@ class ScreenRecorderApp(QWidget):
         # 2. 모니터 선택
         monitor_row = QFrame()
         monitor_row.setObjectName("optionRow")
+        monitor_row.setFixedHeight(64)
         monitor_layout = QHBoxLayout(monitor_row)
-        monitor_layout.setContentsMargins(12, 8, 10, 8)
+        monitor_layout.setContentsMargins(12, 7, 10, 7)
         monitor_layout.setSpacing(8)
         monitor_label = QLabel("녹화 화면")
         monitor_label.setObjectName("fieldLabel")
         monitor_label.setFixedWidth(78)
         self.monitor_combo = QComboBox()
         self.monitor_combo.setMinimumWidth(360)
+        self.monitor_combo.setFixedHeight(32)
         self.populate_monitors()
         monitor_layout.addWidget(monitor_label)
         monitor_layout.addWidget(self.monitor_combo)
@@ -330,8 +334,9 @@ class ScreenRecorderApp(QWidget):
         # 3. 예약 녹화 종료 설정
         timer_row = QFrame()
         timer_row.setObjectName("optionRow")
+        timer_row.setFixedHeight(64)
         timer_layout = QHBoxLayout(timer_row)
-        timer_layout.setContentsMargins(12, 8, 10, 8)
+        timer_layout.setContentsMargins(12, 7, 10, 7)
         timer_layout.setSpacing(8)
         self.chk_timer = QCheckBox("예약 종료 사용")
         self.chk_timer.stateChanged.connect(self.toggle_timer_input)
@@ -341,6 +346,7 @@ class ScreenRecorderApp(QWidget):
         self.spin_time.setValue(20)
         self.spin_time.setEnabled(False)
         self.spin_time.setFixedWidth(80)
+        self.spin_time.setFixedHeight(32)
         
         timer_layout.addWidget(self.chk_timer)
         timer_layout.addWidget(self.spin_time)
