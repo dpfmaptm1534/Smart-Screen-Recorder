@@ -93,7 +93,7 @@ class ScreenRecorderApp(QWidget):
         keyboard.add_hotkey('F12', self.toggle_record)
 
     def initUI(self):
-        self.setWindowTitle('골때리는 오류 해결된 녹화기')
+        self.setWindowTitle('Smart-Screen-Recorder')
         self.resize(380, 250)
         layout = QVBoxLayout()
 
