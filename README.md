@@ -54,6 +54,3 @@ recorddisplay/
 └── README.md
 ```
 
-## 라이선스
-
-원하는 라이선스를 선택해 추가하세요. 예: MIT License
