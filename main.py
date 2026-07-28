@@ -159,8 +159,8 @@ class ScreenRecorderApp(QWidget):
                 border: 1px solid #465769;
                 border-radius: 4px;
                 color: #edf4fb;
-                min-height: 32px;
-                padding: 6px 12px;
+                height: 34px;
+                padding: 0 12px;
             }
             QPushButton:hover {
                 background-color: #3d4f61;
@@ -211,8 +211,8 @@ class ScreenRecorderApp(QWidget):
                 border: 1px solid #465769;
                 border-radius: 4px;
                 color: #f4f8fb;
-                min-height: 32px;
-                padding: 3px 8px;
+                height: 34px;
+                padding: 0 8px;
             }
             QCheckBox {
                 color: #d8e1ea;
@@ -303,17 +303,19 @@ class ScreenRecorderApp(QWidget):
         path_caption = QLabel("저장")
         path_caption.setObjectName("fieldLabel")
         path_caption.setFixedWidth(78)
+        path_caption.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
         self.path_label = QLabel("output.avi")
         self.path_label.setObjectName("sectionTitle")
         self.path_label.setMinimumWidth(220)
+        self.path_label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
         self.btn_path = QPushButton("경로 변경")
         self.btn_path.setMinimumWidth(92)
-        self.btn_path.setFixedHeight(32)
+        self.btn_path.setFixedHeight(34)
         self.btn_path.clicked.connect(self.set_save_path)
-        path_layout.addWidget(path_caption)
-        path_layout.addWidget(self.path_label)
+        path_layout.addWidget(path_caption, 0, Qt.AlignVCenter)
+        path_layout.addWidget(self.path_label, 0, Qt.AlignVCenter)
         path_layout.addStretch()
-        path_layout.addWidget(self.btn_path)
+        path_layout.addWidget(self.btn_path, 0, Qt.AlignVCenter)
         content_layout.addWidget(path_row)
 
         # 2. 모니터 선택
@@ -326,12 +328,13 @@ class ScreenRecorderApp(QWidget):
         monitor_label = QLabel("녹화 화면")
         monitor_label.setObjectName("fieldLabel")
         monitor_label.setFixedWidth(78)
+        monitor_label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
         self.monitor_combo = QComboBox()
         self.monitor_combo.setMinimumWidth(360)
-        self.monitor_combo.setFixedHeight(32)
+        self.monitor_combo.setFixedHeight(34)
         self.populate_monitors()
-        monitor_layout.addWidget(monitor_label)
-        monitor_layout.addWidget(self.monitor_combo)
+        monitor_layout.addWidget(monitor_label, 0, Qt.AlignVCenter)
+        monitor_layout.addWidget(self.monitor_combo, 0, Qt.AlignVCenter)
         content_layout.addWidget(monitor_row)
 
         # 3. 예약 녹화 종료 설정
@@ -349,11 +352,13 @@ class ScreenRecorderApp(QWidget):
         self.spin_time.setValue(20)
         self.spin_time.setEnabled(False)
         self.spin_time.setFixedWidth(80)
-        self.spin_time.setFixedHeight(32)
+        self.spin_time.setFixedHeight(34)
+        timer_suffix = QLabel("분 후 자동 종료")
+        timer_suffix.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
         
-        timer_layout.addWidget(self.chk_timer)
-        timer_layout.addWidget(self.spin_time)
-        timer_layout.addWidget(QLabel("분 후 자동 종료"))
+        timer_layout.addWidget(self.chk_timer, 0, Qt.AlignVCenter)
+        timer_layout.addWidget(self.spin_time, 0, Qt.AlignVCenter)
+        timer_layout.addWidget(timer_suffix, 0, Qt.AlignVCenter)
         timer_layout.addStretch()
         content_layout.addWidget(timer_row)
 
