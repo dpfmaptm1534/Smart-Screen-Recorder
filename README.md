@@ -1,5 +1,7 @@
 # Smart-Screen-Recorder
 
+<img width="710" height="494" alt="image" src="https://github.com/user-attachments/assets/0a92d9c9-467d-487d-84e2-73e3d7e6767a" />
+
 PyQt5로 만든 간단한 Windows 화면 녹화 프로그램입니다.  
 녹화할 모니터를 선택하고, F12 단축키로 녹화를 시작하거나 종료할 수 있습니다.
 
