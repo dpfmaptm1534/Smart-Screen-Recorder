@@ -1,5 +1,6 @@
 import sys
 import ctypes
+import ctypes.wintypes
 import cv2
 import numpy as np
 import mss
@@ -77,6 +78,8 @@ class RecordThread(QThread):
 
 # --- 3. 메인 UI 창 ---
 class ScreenRecorderApp(QWidget):
+    RESIZE_BORDER_WIDTH = 8
+
     def __init__(self):
         super().__init__()
         self.drag_position = None
@@ -96,8 +99,8 @@ class ScreenRecorderApp(QWidget):
     def initUI(self):
         self.setWindowTitle('Smart-Screen-Recorder')
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
-        self.resize(680, 420)
-        self.setMinimumSize(640, 400)
+        self.resize(720, 500)
+        self.setMinimumSize(680, 460)
         self.setStyleSheet("""
             QWidget {
                 background-color: #1f2833;
@@ -275,8 +278,8 @@ class ScreenRecorderApp(QWidget):
         content = QFrame()
         content.setObjectName("contentPanel")
         content_layout = QVBoxLayout(content)
-        content_layout.setContentsMargins(20, 18, 20, 18)
-        content_layout.setSpacing(12)
+        content_layout.setContentsMargins(24, 24, 24, 24)
+        content_layout.setSpacing(16)
 
         header_layout = QHBoxLayout()
         header_text = QVBoxLayout()
@@ -356,6 +359,7 @@ class ScreenRecorderApp(QWidget):
 
         hint = QLabel("F12로 언제든 녹화를 시작하거나 종료할 수 있습니다.")
         hint.setObjectName("mutedLabel")
+        hint.setMinimumHeight(24)
         content_layout.addWidget(hint)
         content_layout.addStretch()
 
@@ -384,6 +388,53 @@ class ScreenRecorderApp(QWidget):
     def mouseReleaseEvent(self, event):
         self.drag_position = None
         event.accept()
+
+    def nativeEvent(self, event_type, message):
+        if sys.platform != "win32" or event_type != b"windows_generic_MSG":
+            return super().nativeEvent(event_type, message)
+
+        msg = ctypes.wintypes.MSG.from_address(int(message))
+        WM_NCHITTEST = 0x0084
+        if msg.message != WM_NCHITTEST or self.isMaximized():
+            return super().nativeEvent(event_type, message)
+
+        HTLEFT = 10
+        HTRIGHT = 11
+        HTTOP = 12
+        HTTOPLEFT = 13
+        HTTOPRIGHT = 14
+        HTBOTTOM = 15
+        HTBOTTOMLEFT = 16
+        HTBOTTOMRIGHT = 17
+
+        cursor_x = ctypes.c_short(msg.lParam & 0xFFFF).value
+        cursor_y = ctypes.c_short((msg.lParam >> 16) & 0xFFFF).value
+        window_rect = self.frameGeometry()
+        border = self.RESIZE_BORDER_WIDTH
+
+        on_left = window_rect.left() <= cursor_x < window_rect.left() + border
+        on_right = window_rect.right() - border < cursor_x <= window_rect.right()
+        on_top = window_rect.top() <= cursor_y < window_rect.top() + border
+        on_bottom = window_rect.bottom() - border < cursor_y <= window_rect.bottom()
+
+        if on_top and on_left:
+            return True, HTTOPLEFT
+        if on_top and on_right:
+            return True, HTTOPRIGHT
+        if on_bottom and on_left:
+            return True, HTBOTTOMLEFT
+        if on_bottom and on_right:
+            return True, HTBOTTOMRIGHT
+        if on_left:
+            return True, HTLEFT
+        if on_right:
+            return True, HTRIGHT
+        if on_top:
+            return True, HTTOP
+        if on_bottom:
+            return True, HTBOTTOM
+
+        return super().nativeEvent(event_type, message)
 
     def populate_monitors(self):
         with mss.mss() as sct:
