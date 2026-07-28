@@ -79,6 +79,7 @@ class RecordThread(QThread):
 class ScreenRecorderApp(QWidget):
     def __init__(self):
         super().__init__()
+        self.drag_position = None
         self.initUI()
         self.recording_thread = None
         self.overlay = RedBorderOverlay() # 수정된 오버레이 클래스 사용
@@ -94,8 +95,9 @@ class ScreenRecorderApp(QWidget):
 
     def initUI(self):
         self.setWindowTitle('Smart-Screen-Recorder')
-        self.resize(520, 320)
-        self.setMinimumSize(480, 300)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
+        self.resize(680, 390)
+        self.setMinimumSize(640, 360)
         self.setStyleSheet("""
             QWidget {
                 background-color: #1f2833;
@@ -131,6 +133,10 @@ class ScreenRecorderApp(QWidget):
                 font-size: 12px;
                 font-weight: 700;
             }
+            QFrame#titleBar {
+                background-color: #111821;
+                border-bottom: 1px solid #263443;
+            }
             QFrame#topBar {
                 background-color: #17202a;
                 border-bottom: 1px solid #334251;
@@ -143,6 +149,7 @@ class ScreenRecorderApp(QWidget):
                 background-color: #202a35;
                 border: 1px solid #3a4958;
                 border-radius: 4px;
+                min-height: 46px;
             }
             QPushButton {
                 background-color: #334251;
@@ -169,6 +176,33 @@ class ScreenRecorderApp(QWidget):
             QPushButton#recordButton:hover {
                 background-color: #2b1217;
             }
+            QPushButton#windowButton {
+                background-color: transparent;
+                border: none;
+                border-radius: 0;
+                color: #c8d2dc;
+                font-size: 13px;
+                min-width: 42px;
+                min-height: 30px;
+                padding: 0;
+            }
+            QPushButton#windowButton:hover {
+                background-color: #263443;
+            }
+            QPushButton#closeButton {
+                background-color: transparent;
+                border: none;
+                border-radius: 0;
+                color: #c8d2dc;
+                font-size: 13px;
+                min-width: 42px;
+                min-height: 30px;
+                padding: 0;
+            }
+            QPushButton#closeButton:hover {
+                background-color: #d9434e;
+                color: #ffffff;
+            }
             QComboBox, QSpinBox {
                 background-color: #101820;
                 border: 1px solid #465769;
@@ -187,8 +221,38 @@ class ScreenRecorderApp(QWidget):
         root_layout.setContentsMargins(0, 0, 0, 0)
         root_layout.setSpacing(0)
 
+        self.title_bar = QFrame()
+        self.title_bar.setObjectName("titleBar")
+        self.title_bar.setFixedHeight(34)
+        title_bar_layout = QHBoxLayout(self.title_bar)
+        title_bar_layout.setContentsMargins(12, 0, 0, 0)
+        title_bar_layout.setSpacing(0)
+
+        window_title = QLabel("Smart-Screen-Recorder")
+        window_title.setObjectName("mutedLabel")
+        title_bar_layout.addWidget(window_title)
+        title_bar_layout.addStretch()
+
+        btn_minimize = QPushButton("_")
+        btn_minimize.setObjectName("windowButton")
+        btn_minimize.clicked.connect(self.showMinimized)
+        title_bar_layout.addWidget(btn_minimize)
+
+        self.btn_maximize = QPushButton("□")
+        self.btn_maximize.setObjectName("windowButton")
+        self.btn_maximize.clicked.connect(self.toggle_maximize)
+        title_bar_layout.addWidget(self.btn_maximize)
+
+        btn_close = QPushButton("X")
+        btn_close.setObjectName("closeButton")
+        btn_close.clicked.connect(self.close)
+        title_bar_layout.addWidget(btn_close)
+
+        root_layout.addWidget(self.title_bar)
+
         top_bar = QFrame()
         top_bar.setObjectName("topBar")
+        top_bar.setFixedHeight(92)
         top_layout = QHBoxLayout(top_bar)
         top_layout.setContentsMargins(14, 8, 12, 8)
         top_layout.setSpacing(10)
@@ -237,7 +301,9 @@ class ScreenRecorderApp(QWidget):
         path_caption.setFixedWidth(78)
         self.path_label = QLabel("output.avi")
         self.path_label.setObjectName("sectionTitle")
+        self.path_label.setMinimumWidth(220)
         self.btn_path = QPushButton("경로 변경")
+        self.btn_path.setMinimumWidth(92)
         self.btn_path.clicked.connect(self.set_save_path)
         path_layout.addWidget(path_caption)
         path_layout.addWidget(self.path_label)
@@ -255,6 +321,7 @@ class ScreenRecorderApp(QWidget):
         monitor_label.setObjectName("fieldLabel")
         monitor_label.setFixedWidth(78)
         self.monitor_combo = QComboBox()
+        self.monitor_combo.setMinimumWidth(360)
         self.populate_monitors()
         monitor_layout.addWidget(monitor_label)
         monitor_layout.addWidget(self.monitor_combo)
@@ -273,6 +340,7 @@ class ScreenRecorderApp(QWidget):
         self.spin_time.setRange(1, 1440)
         self.spin_time.setValue(20)
         self.spin_time.setEnabled(False)
+        self.spin_time.setFixedWidth(80)
         
         timer_layout.addWidget(self.chk_timer)
         timer_layout.addWidget(self.spin_time)
@@ -288,6 +356,28 @@ class ScreenRecorderApp(QWidget):
         root_layout.addWidget(content)
 
         self.setLayout(root_layout)
+
+    def toggle_maximize(self):
+        if self.isMaximized():
+            self.showNormal()
+            self.btn_maximize.setText("□")
+        else:
+            self.showMaximized()
+            self.btn_maximize.setText("❐")
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton and event.pos().y() <= self.title_bar.height():
+            self.drag_position = event.globalPos() - self.frameGeometry().topLeft()
+            event.accept()
+
+    def mouseMoveEvent(self, event):
+        if self.drag_position and event.buttons() & Qt.LeftButton and not self.isMaximized():
+            self.move(event.globalPos() - self.drag_position)
+            event.accept()
+
+    def mouseReleaseEvent(self, event):
+        self.drag_position = None
+        event.accept()
 
     def populate_monitors(self):
         with mss.mss() as sct:
