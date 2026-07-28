@@ -1,0 +1,16 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Recorded output files
+*.avi
+*.mp4
+*.mov
+*.mkv
+
+# Local/editor files
+.env
+.vscode/
+.idea/
